@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["GiX"]
 repository = "https://github.com/yogiastawan/gix_dll_rlib.git"
-description = "Custom double linked list in rust"
+license = "MIT"
+description = "Double linked list in rust"
 
 [dependencies]
