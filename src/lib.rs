@@ -1,5 +1,45 @@
 use std::fmt;
-// ...existing code...
+
+use std::{
+    cell::RefCell,
+    rc::{Rc, Weak},
+};
+
+use crate::error::{Error, Result};
+
+pub mod error;
+
+/// Node of Double Linked List.
+/// Node hold `Value`, `Next Node`, and `Previouse Node`
+#[derive(Debug)]
+pub struct Node<T> {
+    /// Smart pointer of next node. Containt `None` if no next node
+    next: Option<Rc<RefCell<Node<T>>>>,
+    /// Smart weak pointer of previouse node. Contain `None` if no previouse node
+    prev: Option<Weak<RefCell<Node<T>>>>,
+    /// Value of Node
+    val: T,
+}
+
+impl<T> Node<T> {
+    /// Set value of Node.
+    pub fn set_value(&mut self, value: T) {
+        self.val = value;
+    }
+
+    /// Get Reference Value of Node
+    pub fn get_value_ref(&self) -> &T {
+        &self.val
+    }
+}
+
+/// Double Linked List Object
+#[derive(Debug)]
+pub struct DoubleLinkedList<T> {
+    head: Option<Rc<RefCell<Node<T>>>>,
+    size: usize,
+    tail: Option<Rc<RefCell<Node<T>>>>,
+}
 
 impl<T: fmt::Display> fmt::Display for DoubleLinkedList<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -17,40 +57,15 @@ impl<T: fmt::Display> fmt::Display for DoubleLinkedList<T> {
         write!(f, "]")
     }
 }
-use std::{
-    cell::RefCell,
-    rc::{Rc, Weak},
-};
-
-use crate::error::{Error, Result};
-
-pub mod error;
-
-#[derive(Debug)]
-pub struct Node<T> {
-    next: Option<Rc<RefCell<Node<T>>>>,
-    prev: Option<Weak<RefCell<Node<T>>>>,
-    val: T,
-}
-
-impl<T> Node<T> {
-    pub fn set_value(&mut self, value: T) {
-        self.val = value;
-    }
-
-    pub fn get_value_ref(&self) -> &T {
-        &self.val
-    }
-}
-
-#[derive(Debug)]
-pub struct DoubleLinkedList<T> {
-    head: Option<Rc<RefCell<Node<T>>>>,
-    size: usize,
-    tail: Option<Rc<RefCell<Node<T>>>>,
-}
 
 impl<T> DoubleLinkedList<T> {
+    /// Create new Double Linked List object with empty Node. Example:
+    /// ```rust
+    /// use gix_dll_rlib::DoubleLinkedList;
+    ///
+    /// let mut dll= DoubleLinkedList::<String>::new();
+    /// println!("{}",dll);
+    /// ```
     pub fn new() -> Self {
         Self {
             head: None,
@@ -59,6 +74,36 @@ impl<T> DoubleLinkedList<T> {
         }
     }
 
+    /// Get length of Nodes in Double Linked List.
+    /// ```rust
+    /// use gix_dll_rlib::DoubleLinkedList;
+    ///
+    /// let mut dll=DoubleLinkedList::new();
+    /// let one = dll.append("one".to_string());
+    ///
+    /// assert_eq!(1,dll.length());
+    /// ```
+    pub fn length(&self) -> usize {
+        self.size
+    }
+
+    /// Append Node to Double Linked List. This function will add Node to the last or tail of Double Linked List.
+    /// This function will return Smartpointer of RefCell Node. If Double Linked List is empty
+    /// head and tail will contain same node that just created.
+    /// Example:
+    /// ```rust
+    /// use gix_dll_rlib::DoubleLinkedList;
+    /// use gix_dll_rlib::Node;
+    /// use std::{
+    /// cell::RefCell,
+    /// rc::Rc,
+    /// };
+    ///
+    /// let mut dll=DoubleLinkedList::new();
+    /// let one:Rc<RefCell<Node<String>>> = dll.append("one".to_string());
+    ///
+    /// assert_eq!(one.borrow().get_value_ref(),"one");
+    /// ```
     pub fn append(&mut self, value: T) -> Rc<RefCell<Node<T>>> {
         let node = Rc::new(RefCell::new(Node {
             next: None,
@@ -80,6 +125,24 @@ impl<T> DoubleLinkedList<T> {
         self.size += 1;
         node
     }
+
+    /// Prepend Node to Double Linked List. This function will add Node to the first or head of Double Linked List.
+    /// This function will return Smartpointer of RefCell Node. If Double Linked List is empty
+    /// head and tail will contain same node that just created.
+    /// Example:
+    /// ```rust
+    /// use gix_dll_rlib::DoubleLinkedList;
+    /// use gix_dll_rlib::Node;
+    /// use std::{
+    /// cell::RefCell,
+    /// rc::Rc,
+    /// };
+    ///
+    /// let mut dll=DoubleLinkedList::new();
+    /// let one:Rc<RefCell<Node<String>>> = dll.prepend("one".to_string());
+    ///
+    /// assert_eq!(one.borrow().get_value_ref(),"one");
+    /// ```
     pub fn prepend(&mut self, value: T) -> Rc<RefCell<Node<T>>> {
         let node = Rc::new(RefCell::new(Node {
             next: self.head.as_ref().map(|head| head.clone()),
@@ -119,7 +182,6 @@ impl<T> DoubleLinkedList<T> {
         }
 
         //get node next
-
         let node_next = node.borrow().next.clone();
 
         // create new node
@@ -189,7 +251,6 @@ impl<T> DoubleLinkedList<T> {
         Ok(new_node)
     }
 
-    // TODO! Add remove node
     pub fn remove(&mut self, node: Rc<RefCell<Node<T>>>) -> Result<T>
     where
         T: Default,
@@ -231,7 +292,7 @@ impl<T> DoubleLinkedList<T> {
         let val = std::mem::take(&mut node.borrow_mut().val);
         Ok(val)
     }
-    // TODO! Add remove at index
+
     pub fn remove_at(&mut self, index: usize) -> Result<T>
     where
         T: Default,
@@ -270,7 +331,6 @@ impl<T> DoubleLinkedList<T> {
         };
         self.remove(node)
     }
-    // TODO! Add set value at index
 
     pub fn set_value_at(&mut self, value: T, index: usize) -> Result<()> {
         if self.size == 0 {
@@ -310,7 +370,6 @@ impl<T> DoubleLinkedList<T> {
 
         Ok(())
     }
-    // TODO! Add get value at index
 
     pub fn get_value_at(&mut self, index: usize) -> Result<T>
     where
@@ -363,7 +422,7 @@ mod tests {
 
         let one = g_dll.prepend("one".to_string());
         assert_eq!(
-            &one.borrow().val,
+            one.borrow().get_value_ref(),
             &g_dll.head.as_ref().unwrap().borrow().val
         );
 
@@ -444,7 +503,7 @@ mod tests {
                 .val
         );
 
-        println!(">> test_intert:");
+        println!(">> test_insert:");
         println!("{}", g_dll);
     }
 
