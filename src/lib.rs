@@ -10,7 +10,7 @@ use crate::error::{Error, Result};
 pub mod error;
 
 /// Node of Double Linked List.
-/// Node hold `Value`, `Next Node`, and `Previouse Node`
+/// Node hold `Value`, `Next Node`, `Previouse Node`, and `Identifier`
 #[derive(Debug)]
 pub struct Node<T> {
     /// Smart pointer of next node. Containt `None` if no next node
@@ -19,6 +19,8 @@ pub struct Node<T> {
     prev: Option<Weak<RefCell<Node<T>>>>,
     /// Value of Node
     val: T,
+    /// Key identifier
+    identifier: usize,
 }
 
 impl<T> Node<T> {
@@ -39,6 +41,7 @@ pub struct DoubleLinkedList<T> {
     head: Option<Rc<RefCell<Node<T>>>>,
     size: usize,
     tail: Option<Rc<RefCell<Node<T>>>>,
+    identifier: usize,
 }
 
 impl<T: fmt::Display> fmt::Display for DoubleLinkedList<T> {
@@ -59,18 +62,21 @@ impl<T: fmt::Display> fmt::Display for DoubleLinkedList<T> {
 }
 
 impl<T> DoubleLinkedList<T> {
-    /// Create new Double Linked List object with empty Node. Example:
+    /// Create new Double Linked List object with empty Node. Parameter `id` is unique id of Double Linked List.
+    /// Each Double Linked List must have different `id`.
+    /// Example:
     /// ```rust
     /// use gix_dll_rlib::DoubleLinkedList;
     ///
-    /// let mut dll= DoubleLinkedList::<String>::new();
+    /// let mut dll= DoubleLinkedList::<String>::new(0);
     /// println!("{}",dll);
     /// ```
-    pub fn new() -> Self {
+    pub fn new(id: usize) -> Self {
         Self {
             head: None,
             tail: None,
             size: 0,
+            identifier: id,
         }
     }
 
@@ -78,7 +84,7 @@ impl<T> DoubleLinkedList<T> {
     /// ```rust
     /// use gix_dll_rlib::DoubleLinkedList;
     ///
-    /// let mut dll=DoubleLinkedList::new();
+    /// let mut dll=DoubleLinkedList::new(1);
     /// let one = dll.append("one".to_string());
     ///
     /// assert_eq!(1,dll.length());
@@ -99,7 +105,7 @@ impl<T> DoubleLinkedList<T> {
     /// rc::Rc,
     /// };
     ///
-    /// let mut dll=DoubleLinkedList::new();
+    /// let mut dll=DoubleLinkedList::new(0);
     /// let one:Rc<RefCell<Node<String>>> = dll.append("one".to_string());
     ///
     /// assert_eq!(one.borrow().get_value_ref(),"one");
@@ -109,6 +115,7 @@ impl<T> DoubleLinkedList<T> {
             next: None,
             prev: self.tail.as_ref().map(|tail| Rc::downgrade(tail)),
             val: value,
+            identifier: self.identifier,
         }));
 
         match self.tail.take() {
@@ -138,7 +145,7 @@ impl<T> DoubleLinkedList<T> {
     /// rc::Rc,
     /// };
     ///
-    /// let mut dll=DoubleLinkedList::new();
+    /// let mut dll=DoubleLinkedList::new(3);
     /// let one:Rc<RefCell<Node<String>>> = dll.prepend("one".to_string());
     ///
     /// assert_eq!(one.borrow().get_value_ref(),"one");
@@ -148,6 +155,7 @@ impl<T> DoubleLinkedList<T> {
             next: self.head.as_ref().map(|head| head.clone()),
             prev: None,
             val: value,
+            identifier: self.identifier,
         }));
 
         match self.head.take() {
@@ -174,6 +182,12 @@ impl<T> DoubleLinkedList<T> {
         if self.size == 0 {
             return Err(Error::Empty);
         }
+
+        // check if list and node is associated
+        if self.identifier != node.borrow().identifier {
+            return Err(Error::NodeNotAssociated);
+        }
+
         // if node is same as tail just call append function
         if let Some(tail) = &self.tail {
             if Rc::ptr_eq(&node, tail) {
@@ -189,6 +203,7 @@ impl<T> DoubleLinkedList<T> {
             next: node_next.clone(),          // set next with node.next
             prev: Some(Rc::downgrade(&node)), // set previouse with node
             val: value,
+            identifier: self.identifier,
         }));
 
         // set node.next previous with new node
@@ -217,6 +232,12 @@ impl<T> DoubleLinkedList<T> {
         if self.size == 0 {
             return Err(Error::Empty);
         }
+
+        // check if list and node is associated
+        if self.identifier != node.borrow().identifier {
+            return Err(Error::NodeNotAssociated);
+        }
+
         // if node same as head just call prepend function
         if let Some(head) = &self.head {
             if Rc::ptr_eq(&node, head) {
@@ -232,6 +253,7 @@ impl<T> DoubleLinkedList<T> {
             next: Some(node.clone()),
             prev: node_prev.clone(),
             val: value,
+            identifier: self.identifier,
         }));
 
         // set node.prev next with new node
@@ -430,7 +452,7 @@ mod tests {
 
     #[test]
     fn test_add() {
-        let mut g_dll = DoubleLinkedList::<String>::new();
+        let mut g_dll = DoubleLinkedList::<String>::new(0);
 
         let one = g_dll.prepend("one".to_string());
         assert_eq!(
@@ -456,7 +478,7 @@ mod tests {
 
     #[test]
     fn test_insert() {
-        let mut g_dll = DoubleLinkedList::<String>::new();
+        let mut g_dll = DoubleLinkedList::<String>::new(0);
 
         let one = g_dll.append("one".to_string());
         assert_eq!(
@@ -521,7 +543,7 @@ mod tests {
 
     #[test]
     fn test_remove() {
-        let mut g_dll = DoubleLinkedList::<String>::new();
+        let mut g_dll = DoubleLinkedList::<String>::new(0);
 
         let one = g_dll.append("one".to_string());
         assert_eq!(
@@ -607,7 +629,7 @@ mod tests {
     pub fn test_set_value() {
         println!(">> test_set_value:");
 
-        let mut g_dll = DoubleLinkedList::new();
+        let mut g_dll = DoubleLinkedList::new(0);
         let one = g_dll.append("one".to_string());
         assert_eq!(
             one.borrow().get_value_ref(),
