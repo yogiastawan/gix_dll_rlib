@@ -10,17 +10,21 @@ pub enum Error {
     SetValueFailed,
     GetValuefailed,
     IndexOutOfBound,
+    NodeNotAssociated,
 }
 
 impl ToString for Error {
     fn to_string(&self) -> String {
-        match self {
-            Error::Empty => "Error::Empty".to_string(),
-            Error::InsertFailed => "Error::InsertFailed".to_string(),
-            Error::RemoveFailed => "Error::RemoveFailed".to_string(),
-            Error::SetValueFailed => "Error::SetValueFailed".to_string(),
-            Error::GetValuefailed => "Error::GetValueFailed".to_string(),
-            Error::IndexOutOfBound => "Error::IndexOutOfBound".to_string(),
-        }
+        let error = match self {
+            Error::Empty => "Error::Empty",
+            Error::InsertFailed => "Error::InsertFailed",
+            Error::RemoveFailed => "Error::RemoveFailed",
+            Error::SetValueFailed => "Error::SetValueFailed",
+            Error::GetValuefailed => "Error::GetValueFailed",
+            Error::IndexOutOfBound => "Error::IndexOutOfBound",
+            Error::NodeNotAssociated => "NodeNotAssociated",
+        };
+
+        error.to_string()
     }
 }
