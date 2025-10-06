@@ -301,7 +301,7 @@ impl<T> DoubleLinkedList<T> {
             return Err(Error::Empty);
         }
         if index >= self.size {
-            return Err(Error::RemoveFailed);
+            return Err(Error::IndexOutOfBound);
         }
 
         let node = match index <= self.size / 2 {
@@ -309,24 +309,28 @@ impl<T> DoubleLinkedList<T> {
                 let mut id = 0usize;
                 let mut current_node = self.head.clone();
                 while id < index {
-                    current_node = current_node.ok_or(Error::Empty)?.borrow().next.clone();
+                    current_node = current_node
+                        .ok_or(Error::RemoveFailed)?
+                        .borrow()
+                        .next
+                        .clone();
                     id += 1;
                 }
-                current_node.ok_or(Error::Empty)?
+                current_node.ok_or(Error::RemoveFailed)?
             }
             false => {
                 let mut id = self.size - 1;
                 let mut current_node = self.tail.clone();
                 while id > index {
                     current_node = current_node
-                        .ok_or(Error::Empty)?
+                        .ok_or(Error::RemoveFailed)?
                         .borrow()
                         .prev
                         .as_ref()
                         .and_then(|w| w.upgrade());
                     id -= 1;
                 }
-                current_node.ok_or(Error::Empty)?
+                current_node.ok_or(Error::RemoveFailed)?
             }
         };
         self.remove(node)
@@ -337,7 +341,7 @@ impl<T> DoubleLinkedList<T> {
             return Err(Error::Empty);
         }
         if index >= self.size {
-            return Err(Error::SetValueFailed);
+            return Err(Error::IndexOutOfBound);
         }
 
         let node = match index <= self.size / 2 {
@@ -345,24 +349,28 @@ impl<T> DoubleLinkedList<T> {
                 let mut id = 0usize;
                 let mut current_node = self.head.clone();
                 while id < index {
-                    current_node = current_node.ok_or(Error::Empty)?.borrow().next.clone();
+                    current_node = current_node
+                        .ok_or(Error::SetValueFailed)?
+                        .borrow()
+                        .next
+                        .clone();
                     id += 1;
                 }
-                current_node.ok_or(Error::Empty)?
+                current_node.ok_or(Error::SetValueFailed)?
             }
             false => {
                 let mut id = self.size - 1;
                 let mut current_node = self.tail.clone();
                 while id > index {
                     current_node = current_node
-                        .ok_or(Error::Empty)?
+                        .ok_or(Error::SetValueFailed)?
                         .borrow()
                         .prev
                         .as_ref()
                         .and_then(|w| w.upgrade());
                     id -= 1;
                 }
-                current_node.ok_or(Error::Empty)?
+                current_node.ok_or(Error::SetValueFailed)?
             }
         };
 
@@ -379,7 +387,7 @@ impl<T> DoubleLinkedList<T> {
             return Err(Error::Empty);
         }
         if index >= self.size {
-            return Err(Error::SetValueFailed);
+            return Err(Error::IndexOutOfBound);
         }
 
         let node = match index <= self.size / 2 {
@@ -387,24 +395,28 @@ impl<T> DoubleLinkedList<T> {
                 let mut id = 0usize;
                 let mut current_node = self.head.clone();
                 while id < index {
-                    current_node = current_node.ok_or(Error::Empty)?.borrow().next.clone();
+                    current_node = current_node
+                        .ok_or(Error::SetValueFailed)?
+                        .borrow()
+                        .next
+                        .clone();
                     id += 1;
                 }
-                current_node.ok_or(Error::Empty)?
+                current_node.ok_or(Error::SetValueFailed)?
             }
             false => {
                 let mut id = self.size - 1;
                 let mut current_node = self.tail.clone();
                 while id > index {
                     current_node = current_node
-                        .ok_or(Error::Empty)?
+                        .ok_or(Error::SetValueFailed)?
                         .borrow()
                         .prev
                         .as_ref()
                         .and_then(|w| w.upgrade());
                     id -= 1;
                 }
-                current_node.ok_or(Error::Empty)?
+                current_node.ok_or(Error::SetValueFailed)?
             }
         };
 

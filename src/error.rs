@@ -9,6 +9,7 @@ pub enum Error {
     RemoveFailed,
     SetValueFailed,
     GetValuefailed,
+    IndexOutOfBound,
 }
 
 impl ToString for Error {
@@ -19,6 +20,7 @@ impl ToString for Error {
             Error::RemoveFailed => "Error::RemoveFailed".to_string(),
             Error::SetValueFailed => "Error::SetValueFailed".to_string(),
             Error::GetValuefailed => "Error::GetValueFailed".to_string(),
+            Error::IndexOutOfBound => "Error::IndexOutOfBound".to_string(),
         }
     }
 }
