@@ -2,8 +2,8 @@
 name = "gix_dll_rlib"
 version = "0.1.0"
 edition = "2024"
-author = "yogiastawan"
-email = "yogi.astawan@gmail.com"
+authors = ["GiX"]
+repository = "https://github.com/yogiastawan/gix_dll_rlib.git"
 description = "Custom double linked list in rust"
 
 [dependencies]
