@@ -531,4 +531,30 @@ mod tests {
         println!(">> - After remove -");
         println!("{}", g_dll);
     }
+
+    #[test]
+    pub fn test_set_value() {
+        println!(">> test_set_value:");
+
+        let mut g_dll = DoubleLinkedList::new();
+        let one = g_dll.append("one".to_string());
+        assert_eq!(
+            one.borrow().get_value_ref(),
+            &g_dll.get_value_at(0).unwrap()
+        );
+
+        let two = g_dll.append("two".to_string());
+        assert_eq!(
+            two.borrow().get_value_ref(),
+            &g_dll.get_value_at(1).unwrap()
+        );
+        println!("{}", &g_dll);
+
+        one.borrow_mut().set_value("one-1".to_string());
+
+        let _ = g_dll.set_value_at("two-2".to_string(), 1);
+        assert_eq!("two-2".to_string(), g_dll.get_value_at(1).unwrap());
+
+        println!("{}", &g_dll);
+    }
 }
