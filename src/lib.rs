@@ -9,21 +9,24 @@ use crate::error::{Error, Result};
 
 pub mod error;
 
+/// Node of Double Linked List. Node is alias name of the Smartpointer of RefCell Node
+pub type Node<T> = Rc<RefCell<VNode<T>>>;
+
 /// Node of Double Linked List.
 /// Node hold `Value`, `Next Node`, `Previouse Node`, and `Identifier`
 #[derive(Debug)]
-pub struct Node<T> {
+pub struct VNode<T> {
     /// Smart pointer of next node. Containt `None` if no next node
-    next: Option<Rc<RefCell<Node<T>>>>,
+    next: Option<Node<T>>,
     /// Smart weak pointer of previouse node. Contain `None` if no previouse node
-    prev: Option<Weak<RefCell<Node<T>>>>,
+    prev: Option<Weak<RefCell<VNode<T>>>>,
     /// Value of Node
     val: T,
     /// Key identifier
     identifier: usize,
 }
 
-impl<T> Node<T> {
+impl<T> VNode<T> {
     /// Set value of Node.
     pub fn set_value(&mut self, value: T) {
         self.val = value;
@@ -38,9 +41,9 @@ impl<T> Node<T> {
 /// Double Linked List Object
 #[derive(Debug)]
 pub struct DoubleLinkedList<T> {
-    head: Option<Rc<RefCell<Node<T>>>>,
+    head: Option<Node<T>>,
     size: usize,
-    tail: Option<Rc<RefCell<Node<T>>>>,
+    tail: Option<Node<T>>,
     identifier: usize,
 }
 
@@ -94,7 +97,7 @@ impl<T> DoubleLinkedList<T> {
     }
 
     /// Append Node to Double Linked List. This function will add Node to the last or tail of Double Linked List.
-    /// This function will return Smartpointer of RefCell Node. If Double Linked List is empty
+    /// This function will return Node. If Double Linked List is empty
     /// head and tail will contain same node that just created.
     /// Example:
     /// ```rust
@@ -106,12 +109,12 @@ impl<T> DoubleLinkedList<T> {
     /// };
     ///
     /// let mut dll=DoubleLinkedList::new(0);
-    /// let one:Rc<RefCell<Node<String>>> = dll.append("one".to_string());
+    /// let one:Node<String> = dll.append("one".to_string());
     ///
     /// assert_eq!(one.borrow().get_value_ref(),"one");
     /// ```
-    pub fn append(&mut self, value: T) -> Rc<RefCell<Node<T>>> {
-        let node = Rc::new(RefCell::new(Node {
+    pub fn append(&mut self, value: T) -> Node<T> {
+        let node = Rc::new(RefCell::new(VNode {
             next: None,
             prev: self.tail.as_ref().map(|tail| Rc::downgrade(tail)),
             val: value,
@@ -146,12 +149,12 @@ impl<T> DoubleLinkedList<T> {
     /// };
     ///
     /// let mut dll=DoubleLinkedList::new(3);
-    /// let one:Rc<RefCell<Node<String>>> = dll.prepend("one".to_string());
+    /// let one:Node<String> = dll.prepend("one".to_string());
     ///
     /// assert_eq!(one.borrow().get_value_ref(),"one");
     /// ```
-    pub fn prepend(&mut self, value: T) -> Rc<RefCell<Node<T>>> {
-        let node = Rc::new(RefCell::new(Node {
+    pub fn prepend(&mut self, value: T) -> Node<T> {
+        let node = Rc::new(RefCell::new(VNode {
             next: self.head.as_ref().map(|head| head.clone()),
             prev: None,
             val: value,
@@ -173,11 +176,7 @@ impl<T> DoubleLinkedList<T> {
         node
     }
 
-    pub fn insert_after(
-        &mut self,
-        node: Rc<RefCell<Node<T>>>,
-        value: T,
-    ) -> Result<Rc<RefCell<Node<T>>>> {
+    pub fn insert_after(&mut self, node: Node<T>, value: T) -> Result<Node<T>> {
         // if empty return error
         if self.size == 0 {
             return Err(Error::Empty);
@@ -199,7 +198,7 @@ impl<T> DoubleLinkedList<T> {
         let node_next = node.borrow().next.clone();
 
         // create new node
-        let new_node = Rc::new(RefCell::new(Node {
+        let new_node = Rc::new(RefCell::new(VNode {
             next: node_next.clone(),          // set next with node.next
             prev: Some(Rc::downgrade(&node)), // set previouse with node
             val: value,
@@ -223,11 +222,7 @@ impl<T> DoubleLinkedList<T> {
         Ok(new_node)
     }
 
-    pub fn insert_before(
-        &mut self,
-        node: Rc<RefCell<Node<T>>>,
-        value: T,
-    ) -> Result<Rc<RefCell<Node<T>>>> {
+    pub fn insert_before(&mut self, node: Node<T>, value: T) -> Result<Node<T>> {
         // if empty cannot insert before
         if self.size == 0 {
             return Err(Error::Empty);
@@ -249,7 +244,7 @@ impl<T> DoubleLinkedList<T> {
         let node_prev = node.borrow().prev.clone();
 
         // create new node
-        let new_node = Rc::new(RefCell::new(Node {
+        let new_node = Rc::new(RefCell::new(VNode {
             next: Some(node.clone()),
             prev: node_prev.clone(),
             val: value,
@@ -273,7 +268,7 @@ impl<T> DoubleLinkedList<T> {
         Ok(new_node)
     }
 
-    pub fn remove(&mut self, node: Rc<RefCell<Node<T>>>) -> Result<T>
+    pub fn remove(&mut self, node: Node<T>) -> Result<T>
     where
         T: Default,
     {
