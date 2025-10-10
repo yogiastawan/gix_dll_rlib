@@ -176,6 +176,26 @@ impl<T> DoubleLinkedList<T> {
         node
     }
 
+    /// Insert new Node<T> after spesific Node<T>.
+    /// The `node` is spesific Node<T> that will be added with new Node<T>.
+    /// This function will return Result<Node<T>>.
+    /// Example:
+    /// ```rust
+    /// use gix_dll_rlib::DoubleLinkedList;
+    /// use gix_dll_rlib::Node;
+    /// use gix_dll_rlib::error::Result;
+    /// use std::{
+    /// cell::RefCell,
+    /// rc::Rc,
+    /// };
+    ///
+    /// let mut dll=DoubleLinkedList::new(0);
+    /// let one: Node<String> = dll.append("one".to_string());
+    ///
+    /// let two: Result<Node<String>> =dll.insert_after(one.clone(), "two".to_string());
+    ///
+    /// assert_eq!(two.is_ok(),true);
+    /// ```
     pub fn insert_after(&mut self, node: Node<T>, value: T) -> Result<Node<T>> {
         // if empty return error
         if self.size == 0 {
@@ -222,6 +242,26 @@ impl<T> DoubleLinkedList<T> {
         Ok(new_node)
     }
 
+    /// Insert new Node<T> before spesific Node<T>.
+    /// The `node` is spesific Node<T> that will be added with new Node<T>.
+    /// This function will return Result<Node<T>>.
+    /// Example:
+    /// ```rust
+    /// use gix_dll_rlib::DoubleLinkedList;
+    /// use gix_dll_rlib::Node;
+    /// use gix_dll_rlib::error::Result;
+    /// use std::{
+    /// cell::RefCell,
+    /// rc::Rc,
+    /// };
+    ///
+    /// let mut dll=DoubleLinkedList::new(0);
+    /// let one: Node<String> = dll.append("one".to_string());
+    ///
+    /// let zero: Result<Node<String>> =dll.insert_before(one.clone(), "zero".to_string());
+    ///
+    /// assert_eq!(zero.is_ok(),true);
+    /// ```
     pub fn insert_before(&mut self, node: Node<T>, value: T) -> Result<Node<T>> {
         // if empty cannot insert before
         if self.size == 0 {
@@ -268,6 +308,7 @@ impl<T> DoubleLinkedList<T> {
         Ok(new_node)
     }
 
+    /// Remove spesific Node<T> from DoubleLinkedList. The function will return Result<T> value of the node.
     pub fn remove(&mut self, node: Node<T>) -> Result<T>
     where
         T: Default,
@@ -310,6 +351,7 @@ impl<T> DoubleLinkedList<T> {
         Ok(val)
     }
 
+    /// Remove Node<T> from DoubleLinkedList at spesific index. The function will return Result<T> value of the node at index.
     pub fn remove_at(&mut self, index: usize) -> Result<T>
     where
         T: Default,
@@ -353,6 +395,7 @@ impl<T> DoubleLinkedList<T> {
         self.remove(node)
     }
 
+    /// Set value of node at spesific index in DoubleLinkedList.
     pub fn set_value_at(&mut self, value: T, index: usize) -> Result<()> {
         if self.size == 0 {
             return Err(Error::Empty);
@@ -396,6 +439,7 @@ impl<T> DoubleLinkedList<T> {
         Ok(())
     }
 
+    /// Get value of node at spesific index in DoubleLinkedList.
     pub fn get_value_at(&mut self, index: usize) -> Result<T>
     where
         T: Clone,
